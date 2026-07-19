@@ -9,15 +9,14 @@ services:
       - "8000:8000"
     environment:
       - APP_ENV=production
-      - DATABASE_URL=postgresql+asyncpg://saathi_user:saathi_pass@db:5432/saathi_db
-      - SYNC_DATABASE_URL=postgresql+psycopg2://saathi_user:saathi_pass@db:5432/saathi_db
+      # Connecting to Supabase Cloud DB (replace with actual URL in production)
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://postgres:postgres@supabase_host:6543/postgres?pgbouncer=true}
+      - SYNC_DATABASE_URL=${SYNC_DATABASE_URL:-postgresql+psycopg2://postgres:postgres@supabase_host:6543/postgres?pgbouncer=true}
       - SECRET_KEY=your-super-secret-key-in-production
       - REDIS_URL=redis://redis:6379/0
       - REDIS_ENABLED=true
       - AI_ENGINE_URL=http://ai_engine:8001
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_started
       ai_engine:
@@ -36,25 +35,6 @@ services:
       - saathi_network
     restart: unless-stopped
 
-  db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: saathi_user
-      POSTGRES_PASSWORD: saathi_pass
-      POSTGRES_DB: saathi_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U saathi_user -d saathi_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - saathi_network
-    restart: unless-stopped
-
   redis:
     image: redis:7-alpine
     ports:
@@ -66,7 +46,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  postgres_data:
   redis_data:
 
 networks:
