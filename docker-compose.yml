@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql+asyncpg://saathi_user:saathi_pass@db:5432/saathi_db
+      - SYNC_DATABASE_URL=postgresql+psycopg2://saathi_user:saathi_pass@db:5432/saathi_db
+      - SECRET_KEY=your-super-secret-key-in-production
+      - REDIS_URL=redis://redis:6379/0
+      - REDIS_ENABLED=true
+      - AI_ENGINE_URL=http://ai_engine:8001
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      ai_engine:
+        condition: service_started
+    networks:
+      - saathi_network
+    restart: unless-stopped
+
+  ai_engine:
+    build:
+      context: ./ai_engine
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    networks:
+      - saathi_network
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: saathi_user
+      POSTGRES_PASSWORD: saathi_pass
+      POSTGRES_DB: saathi_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U saathi_user -d saathi_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - saathi_network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - saathi_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  saathi_network:
+    driver: bridge
