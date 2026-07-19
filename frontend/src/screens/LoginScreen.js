@@ -20,8 +20,8 @@ import { AuthContext } from '../context/AuthContext';
 const { width, height } = Dimensions.get('window');
 
 export const LoginScreen = () => {
-  const [email, setEmail] = useState('seller@example.com'); // Mock defaults
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -37,14 +37,9 @@ export const LoginScreen = () => {
     setError('');
     
     try {
-      // Mocking successful login for hackathon preview if backend is not running
-      // await login(email, password);
-      
-      // Temporary mock bypass:
-      const { setLoading: setAuthLoading } = useContext(AuthContext);
-      setAuthLoading(false); // To test without backend running right now
-      
-      // In real scenario, the AuthContext updates and AppNavigator changes screen automatically.
+      // Call the actual auth context login which uses Axios to hit /api/v1/auth/login
+      await login(email, password);
+      // AuthContext updates and AppNavigator changes screen automatically upon success.
     } catch (err) {
       setError('Invalid credentials or network error.');
     } finally {

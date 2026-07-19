@@ -24,23 +24,24 @@ export const SellerDashboardScreen = () => {
       const statsResponse = await api.get('/seller/dashboard');
       setStats(statsResponse.data);
 
-      // Fetch predictions for the primary product (mocking product_id for now as we need real data)
-      // Example: const predResponse = await api.get('/forecast/{product_id}');
-      // Simulating the dynamic structure expected from the backend:
-      
-      const dynamicChartData = [
-        { value: 40, label: 'Day 1' },
-        { value: 65, label: 'Day 5' },
-        { value: 85, label: 'Day 10' },
-        { value: 110, label: 'Day 15' },
-        { value: 140, label: 'Day 20' },
-      ];
-      setForecastData(dynamicChartData);
-      setRecommendation({
-        title: "Festival peak approaching",
-        desc: "Recommend increasing inventory based on AI analysis."
+      // Fetch predictions for the primary product from our AI Engine via FastAPI
+      // We assume product ID '1' is the primary featured product for this seller for now
+      const predResponse = await api.post('/forecast/predict', {
+        product_id: '1',
+        category: 'Silk'
       });
       
+      // Map API response to the chart format
+      const formattedChartData = predResponse.data.forecast_data.map(item => ({
+        value: item.predicted_demand,
+        label: `Day ${item.day}`
+      }));
+      
+      setForecastData(formattedChartData);
+      setRecommendation({
+        title: predResponse.data.best_selling_window,
+        desc: predResponse.data.recommendation
+      });
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     } finally {
