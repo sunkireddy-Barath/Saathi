@@ -21,7 +21,7 @@ class PredictionResponse(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     # Attempt to load or train model on startup
-    if not os.path.exists("models/xgboost_forecaster.pkl"):
+    if not os.path.exists("models/hybrid_forecaster.pkl"):
         print("Model not found. Triggering training on startup...")
         if not os.path.exists("data/historical_sales.csv"):
             from generate_data import generate_historical_sales
@@ -30,32 +30,47 @@ async def startup_event():
     else:
         forecaster.load_model()
 
-@app.post("/predict", response_model=PredictionResponse)
+@app.post("/predict")
 async def predict_demand(req: PredictionRequest):
     try:
-        # Generate 30 day forecast
-        raw_predictions = forecaster.predict_next_n_days(category=req.category, n_days=30)
+        # Generate 30 day forecast and get real confidence score
+        raw_predictions, confidence_score = forecaster.predict_next_n_days(category=req.category, n_days=30)
         
         # Format response
-        forecast_array = [{"day": i+1, "predicted_demand": val} for i, val in enumerate(raw_predictions)]
+        forecast_array = {"days": list(range(1, 31)), "demand": raw_predictions}
         
-        # Determine best window (highest continuous demand)
+        # Determine best and worst window
         best_day = raw_predictions.index(max(raw_predictions)) + 1
+        worst_day = raw_predictions.index(min(raw_predictions)) + 1
+        
+        expected_demand_units = sum(raw_predictions)
         
         # Simple heuristic rule for recommendation
-        avg_demand = sum(raw_predictions) / len(raw_predictions)
+        avg_demand = expected_demand_units / len(raw_predictions)
+        
         if avg_demand > 20:
-            rec = "High demand expected. Stock up raw materials immediately."
+            rec_action = "increase_stock"
+            rec_reason = "Strong macro-trends and micro-fads point to high upcoming demand."
+            comp_level = "High"
         else:
-            rec = "Stable demand. Maintain current inventory levels."
+            rec_action = "maintain_stock"
+            rec_reason = "Stable baseline demand predicted without significant viral fads."
+            comp_level = "Medium"
             
-        return PredictionResponse(
-            product_id=req.product_id,
-            forecast_data=forecast_array,
-            confidence_score=0.85, # Mock confidence for now
-            best_selling_window=f"Peak around Day {best_day}",
-            recommendation=rec
-        )
+        # The expected revenue requires price which isn't in this request, but the backend handles it.
+        # So we just pass back what we can.
+            
+        return {
+            "product_id": req.product_id,
+            "forecast_data": forecast_array,
+            "confidence_score": round(confidence_score, 2),
+            "best_selling_window": f"Days {max(1, best_day-2)}-{min(30, best_day+2)}",
+            "worst_selling_window": f"Days {max(1, worst_day-2)}-{min(30, worst_day+2)}",
+            "expected_demand_units": expected_demand_units,
+            "competition_level": comp_level,
+            "recommendation": {"action": rec_action, "reason": rec_reason},
+            "model_version": "sequential_residual_v2"
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

@@ -31,12 +31,29 @@ def generate_historical_sales(days=365):
                 
             demand = int(base_demand * seasonality_multiplier * cat_mult)
             
+            # Micro-metrics base
+            item_views = int(demand * np.random.uniform(15, 30))
+            clicks = int(item_views * np.random.uniform(0.1, 0.3))
+            search_volume = int(item_views * np.random.uniform(0.5, 1.5))
+            
+            # Simulate a short-lived viral fad (2% chance)
+            is_viral = 1 if np.random.random() < 0.02 else 0
+            if is_viral:
+                item_views = int(item_views * np.random.uniform(5, 10))
+                clicks = int(clicks * np.random.uniform(5, 10))
+                search_volume = int(search_volume * np.random.uniform(5, 10))
+                # Demand spikes, but maybe not as proportionally, causing high residual error for normal models
+                demand = int(demand * np.random.uniform(1.5, 3.0))
+            
             data.append({
                 'date': date.strftime('%Y-%m-%d'),
                 'category': category,
                 'month': month,
                 'day_of_week': date.weekday(),
                 'is_weekend': 1 if date.weekday() >= 5 else 0,
+                'item_views': item_views,
+                'clicks': clicks,
+                'search_volume': search_volume,
                 'demand': demand,
                 'price_inr': np.random.randint(1000, 15000) if category == 'Silk' else np.random.randint(500, 5000)
             })
