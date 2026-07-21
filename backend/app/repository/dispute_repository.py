@@ -33,3 +33,15 @@ class DisputeRepository(BaseRepository[Dispute]):
         result = await self.db_session.execute(stmt)
         
         return list(result.scalars().all()), total
+
+    async def get_all_disputes(
+        self, skip: int = 0, limit: int = 50
+    ) -> Tuple[List[Dispute], int]:
+        base_stmt = select(Dispute)
+        count_stmt = select(func.count()).select_from(base_stmt.subquery())
+        total = await self.db_session.scalar(count_stmt) or 0
+        
+        stmt = base_stmt.order_by(Dispute.created_at.desc()).offset(skip).limit(limit)
+        result = await self.db_session.execute(stmt)
+        
+        return list(result.scalars().all()), total

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any
-from .model import HybridDemandForecaster
+from model import HybridDemandForecaster
 import os
 
 app = FastAPI(title="Saathi AI Engine", description="Hybrid Demand Forecasting API")
@@ -24,7 +24,7 @@ async def startup_event():
     if not os.path.exists("models/xgboost_forecaster.pkl"):
         print("Model not found. Triggering training on startup...")
         if not os.path.exists("data/historical_sales.csv"):
-            from .generate_data import generate_historical_sales
+            from generate_data import generate_historical_sales
             generate_historical_sales()
         forecaster.train()
     else:

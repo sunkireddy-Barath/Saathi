@@ -61,7 +61,7 @@ class Dispute(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
     # ── Resolution ─────────────────────────────────────────────────────────────
     status: Mapped[str] = mapped_column(
-        String(30), default=DisputeStatus.OPEN.value, nullable=False, index=True
+        String(30), default=DisputeStatus.OPEN.value, nullable=False
     )
     admin_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     winner: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)

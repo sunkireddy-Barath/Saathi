@@ -57,7 +57,6 @@ class AuditLog(Base, UUIDPrimaryKeyMixin):
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
-        index=True,
     )
 
     # ── Indexes ────────────────────────────────────────────────────────────────

@@ -9,6 +9,8 @@ Usage inside a FastAPI dependency:
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+import uuid
+from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -23,9 +25,11 @@ from app.core.config import settings
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,       # Logs all SQL when DEBUG=true
-    pool_pre_ping=True,        # Reconnects stale connections transparently
-    pool_size=10,
-    max_overflow=20,
+    poolclass=NullPool,        # Disable local pooling, use PgBouncer pooling
+    connect_args={
+        "statement_cache_size": 0,
+        "prepared_statement_name_func": lambda: f"__asyncpg_{uuid.uuid4()}__",
+    }
 )
 
 # ── Session factory ────────────────────────────────────────────────────────────

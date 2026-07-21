@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, SafeAreaView, Dimensions, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, SafeAreaView, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import { Search } from 'lucide-react-native';
 import { CustomInput } from '../components/CustomInput';
 import { ProductCard } from '../components/ProductCard';
@@ -7,7 +7,7 @@ import { api } from '../services/api';
 
 const { width } = Dimensions.get('window');
 
-export const MarketplaceScreen = () => {
+export const MarketplaceScreen = ({ navigation }) => {
   const [search, setSearch] = useState('');
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +57,18 @@ export const MarketplaceScreen = () => {
           renderItem={({ item }) => (
             <ProductCard 
               product={item} 
-              onPress={() => console.log('Navigate to details', item.id)}
+              onPress={async () => {
+                if (item.status === 'locked') {
+                  Alert.alert("Already Locked", "Another buyer is currently negotiating for this item.");
+                  return;
+                }
+                try {
+                  const response = await api.post('/negotiation/lock', { product_id: item.id });
+                  navigation.navigate('Chat', { negotiation: response.data, product: item });
+                } catch (error) {
+                  Alert.alert("Error", error.response?.data?.detail || "Failed to lock the deal.");
+                }
+              }}
             />
           )}
           contentContainerStyle={styles.listContent}

@@ -19,6 +19,7 @@ from app.utils.logger import logger
 # ── CORS configuration (exported for use in main.py) ──────────────────────────
 cors_middleware_config = {
     "allow_origins": settings.get_allowed_origins(),
+    "allow_origin_regex": r".*" if not settings.is_production else None,
     "allow_credentials": True,
     "allow_methods": ["*"],
     "allow_headers": ["*"],

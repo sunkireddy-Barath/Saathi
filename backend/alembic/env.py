@@ -11,7 +11,7 @@ from alembic import context
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from app.core.config import settings
-from app.models.base import Base
+from app.core.database import Base
 # Import all models to ensure they are registered with Base.metadata
 import app.models
 

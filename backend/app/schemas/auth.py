@@ -2,6 +2,8 @@
 Auth schemas — signup, login, and token responses.
 """
 
+from datetime import datetime
+from uuid import UUID
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from app.utils.constants import UserRole
@@ -45,7 +47,7 @@ class RefreshRequest(BaseModel):
 
 
 class UserResponse(BaseModel):
-    id: str
+    id: UUID
     name: str
     email: str
     role: str
@@ -54,7 +56,7 @@ class UserResponse(BaseModel):
     is_verified: bool
     phone: str | None = None
     avatar_url: str | None = None
-    created_at: str
+    created_at: datetime
 
     model_config = {"from_attributes": True}
 
@@ -67,3 +69,4 @@ class ChangePasswordRequest(BaseModel):
     @classmethod
     def strong_new_password(cls, v: str) -> str:
         return validate_password_strength(v)
+

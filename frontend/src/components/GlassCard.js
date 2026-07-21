@@ -38,13 +38,12 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   blurContainer: {
-    flex: 1,
+    // Removed flex: 1 to prevent height collapsing
   },
   gradientBorder: {
-    flex: 1,
+    // Removed flex: 1 to prevent height collapsing
   },
   content: {
     padding: 24,
-    flex: 1,
   },
 });

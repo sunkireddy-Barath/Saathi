@@ -59,3 +59,8 @@ class SellerService:
             avg_rating=profile.avg_rating,
             recent_negotiations=recent_negotiations,
         )
+
+    async def get_inventory(self, user_id: UUID, skip: int = 0, limit: int = 20) -> tuple[list[Any], int]:
+        profile = await self.get_profile(user_id)
+        products, total = await self.product_repo.get_seller_products(profile.id, skip=skip, limit=limit)
+        return products, total

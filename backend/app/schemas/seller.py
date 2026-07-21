@@ -1,8 +1,6 @@
-"""
-Seller Pydantic schemas.
-"""
-
+from datetime import datetime
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -44,8 +42,8 @@ class SellerProfileUpdate(BaseModel):
 
 
 class SellerProfileResponse(BaseModel):
-    id: str
-    user_id: str
+    id: UUID
+    user_id: UUID
     artisan_name: Optional[str]
     state: Optional[str]
     district: Optional[str]
@@ -59,7 +57,7 @@ class SellerProfileResponse(BaseModel):
     total_revenue: float
     avg_rating: float
     rating_count: int
-    created_at: str
+    created_at: datetime
 
     model_config = {"from_attributes": True}
 

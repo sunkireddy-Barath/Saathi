@@ -1,8 +1,6 @@
-"""
-Buyer Pydantic schemas.
-"""
-
+from datetime import datetime
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -29,12 +27,12 @@ class BuyerProfileUpdate(BuyerProfileCreate):
 
 
 class BuyerProfileResponse(BaseModel):
-    id: str
-    user_id: str
+    id: UUID
+    user_id: UUID
     company_name: Optional[str]
     gst_number: Optional[str]
     business_type: Optional[str]
     shipping_address: Optional[str]
-    created_at: str
+    created_at: datetime
 
     model_config = {"from_attributes": True}

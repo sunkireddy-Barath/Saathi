@@ -8,7 +8,8 @@ import {
   SafeAreaView,
   ImageBackground,
   Dimensions,
-  Animated
+  Animated,
+  TouchableOpacity
 } from 'react-native';
 import { Mail, Lock, LogIn } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,7 +20,7 @@ import { AuthContext } from '../context/AuthContext';
 
 const { width, height } = Dimensions.get('window');
 
-export const LoginScreen = () => {
+export const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -97,7 +98,9 @@ export const LoginScreen = () => {
             
             <View style={styles.footer}>
               <Text style={styles.footerText}>Don't have an account? </Text>
-              <Text style={styles.footerLink}>Sign up</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+                <Text style={styles.footerLink}>Sign up</Text>
+              </TouchableOpacity>
             </View>
           </GlassCard>
         </KeyboardAvoidingView>

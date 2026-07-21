@@ -69,7 +69,10 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         "BuyerProfile", back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
     trust_events: Mapped[List["TrustEvent"]] = relationship(
-        "TrustEvent", back_populates="user", cascade="all, delete-orphan"
+        "TrustEvent",
+        back_populates="user",
+        foreign_keys="[TrustEvent.user_id]",
+        cascade="all, delete-orphan"
     )
 
     # ── Table-level indexes ────────────────────────────────────────────────────

@@ -43,6 +43,22 @@ async def get_user_disputes(
     )
 
 
+@router.get("/all", response_model=DisputeListResponse)
+async def get_all_disputes(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    current_admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get all open platform disputes (Admin only)."""
+    repo = DisputeRepository(db)
+    skip = (page - 1) * page_size
+    disputes, total = await repo.get_all_disputes(skip=skip, limit=page_size)
+    
+    return DisputeListResponse(
+        items=disputes, total=total, page=page, page_size=page_size
+    )
+
 @router.put("/{dispute_id}/resolve", response_model=DisputeResponse)
 async def resolve_dispute(
     dispute_id: UUID,

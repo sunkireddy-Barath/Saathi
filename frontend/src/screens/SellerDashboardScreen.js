@@ -8,6 +8,7 @@ import { api } from '../services/api';
 const { width } = Dimensions.get('window');
 
 export const SellerDashboardScreen = () => {
+  const [trustScore, setTrustScore] = useState(100);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [forecastData, setForecastData] = useState([]);
@@ -20,18 +21,17 @@ export const SellerDashboardScreen = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      // Fetch seller dashboard stats (Requires authentication in real scenario)
+      const trustResponse = await api.get('/trust/score');
+      setTrustScore(trustResponse.data.current_score);
+
       const statsResponse = await api.get('/seller/dashboard');
       setStats(statsResponse.data);
 
-      // Fetch predictions for the primary product from our AI Engine via FastAPI
-      // We assume product ID '1' is the primary featured product for this seller for now
       const predResponse = await api.post('/forecast/predict', {
         product_id: '1',
         category: 'Silk'
       });
       
-      // Map API response to the chart format
       const formattedChartData = predResponse.data.forecast_data.map(item => ({
         value: item.predicted_demand,
         label: `Day ${item.day}`
@@ -65,9 +65,9 @@ export const SellerDashboardScreen = () => {
             <Text style={styles.greeting}>Hello, Artisan!</Text>
             <Text style={styles.subtitle}>Here is your shop's performance.</Text>
           </View>
-          <View style={styles.trustBadge}>
-            <ShieldCheck color="#10B981" size={20} />
-            <Text style={styles.trustText}>98 Trust</Text>
+          <View style={[styles.trustBadge, trustScore < 50 && { borderColor: '#EF4444', backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
+            <ShieldCheck color={trustScore >= 50 ? "#10B981" : "#EF4444"} size={20} />
+            <Text style={[styles.trustText, trustScore < 50 && { color: '#EF4444' }]}>{trustScore} Trust</Text>
           </View>
         </View>
 
@@ -83,7 +83,7 @@ export const SellerDashboardScreen = () => {
             <TrendingUp color="#10B981" size={24} />
             <Text style={styles.statLabel}>Revenue (INR)</Text>
             <Text style={styles.statValue}>₹{stats?.total_revenue || 0}</Text>
-          </GlassCard
+          </GlassCard>
         </View>
 
         {/* Demand Forecast Chart */}

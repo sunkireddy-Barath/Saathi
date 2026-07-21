@@ -3,6 +3,8 @@ Product Pydantic schemas.
 """
 
 from typing import Any, Dict, List, Optional
+from uuid import UUID
+from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -60,8 +62,8 @@ class ProductUpdate(BaseModel):
 
 
 class ProductResponse(BaseModel):
-    id: str
-    seller_id: str
+    id: UUID
+    seller_id: UUID
     name: str
     description: Optional[str]
     fabric_type: str
@@ -87,7 +89,7 @@ class ProductResponse(BaseModel):
     tags: Optional[List[str]]
     is_featured: bool
     view_count: int
-    created_at: str
+    created_at: datetime
 
     model_config = {"from_attributes": True}
 
